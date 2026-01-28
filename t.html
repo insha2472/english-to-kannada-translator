@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English to Kannada Translator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f4976c 0%, #ffa552 30%, #ff7b54 60%, #d84315 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
+            padding: 28px;
+            max-width: 920px;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #c65911;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .translator-box {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 20px;
+            align-items: start;
+            margin-bottom: 18px;
+        }
+        
+        .input-section, .output-section {
+            flex: 1;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #444;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #e6e6e6;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.18s ease;
+            resize: vertical;
+            min-height: 140px;
+            background: #fff;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #ff8a50;
+            box-shadow: 0 0 0 3px rgba(255, 138, 80, 0.12);
+        }
+        
+        #output {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ffe0cc;
+            border-radius: 8px;
+            background: #fffbf7;
+            min-height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #c65911;
+            font-weight: 600;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+        
+        .button-section {
+            text-align: right;
+            margin-bottom: 12px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #ff8a50 0%, #ff6b35 100%);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            font-size: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.18s ease;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.28);
+        }
+
+        .control-btn {
+            background: transparent;
+            color: #333;
+            border: 1px solid #ffe0cc;
+            padding: 8px 10px;
+            border-radius: 8px;
+            box-shadow: none;
+            font-weight: 600;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            border-color: #ff8a50;
+            background: #fff5f0;
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, #ff8a50 0%, #ff6b35 100%);
+            color: #fff;
+            padding: 10px 18px;
+        }
+        
+        select {
+            padding: 8px 12px;
+            border: 1px solid #ffe0cc;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #ff8a50;
+            box-shadow: 0 0 0 3px rgba(255, 138, 80, 0.12);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            text-align: left;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #666;
+            min-height: 20px;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #ff8a50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .success {
+            color: #d97706;
+        }
+
+        .error {
+            color: #ea580c;
+        
+        .char-count {
+            text-align: right;
+            font-size: 12px;
+            color: #d97706;
+            margin-top: 5px;
+        }
+        
+        .history {
+            margin-top: 14px;
+            background: #fff9f3;
+            border-radius: 8px;
+            padding: 8px;
+            border: 1px solid #ffe0cc;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+            max-height: 260px;
+            overflow: auto;
+        }
+
+        .history-item {
+            padding: 8px 10px;
+            border-bottom: 1px solid #f0e6dd;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.12s ease;
+        }
+
+        .history-item:hover { background: #fff0e6; }
+
+        .history-item:last-child { border-bottom: none; }
+
+        .fade-in { animation: fadeIn 220ms ease forwards; opacity: 0; }
+        @keyframes fadeIn { to { opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>English to Kannada Translator</h1>
+            <p class="subtitle">Translate English text to Kannada — Online & Offline Support</p>
+        </div>
+
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px;justify-content:space-between;">
+            <div style="display:flex;gap:12px;align-items:center;">
+            <select id="samples" onchange="onSampleChange()" aria-label="Sample phrases">
+                <option value="">-- Try a sample phrase --</option>
+                <option value="Hello">Hello</option>
+                <option value="Good morning">Good morning</option>
+                <option value="How are you?">How are you?</option>
+                <option value="Thank you">Thank you</option>
+                <option value="Where is the bathroom?">Where is the bathroom?</option>
+            </select>
+            <button class="control-btn" onclick="clearAll()" title="Clear input and output">Clear</button>
+            <button class="control-btn" onclick="copyOutput()" title="Copy Kannada output">Copy</button>
+            <button class="control-btn" onclick="speakOutput()" title="Speak Kannada output">Speak</button>
+            <button class="control-btn" id="recordBtn" onclick="toggleRecognition()" title="Start/stop voice input">🎤 Record</button>
+            </div>
+            <div>
+            <button class="control-btn" id="dirBtn" onclick="toggleDirection()" title="Toggle direction">EN → KN</button>
+            </div>
+        </div>
+
+        <div class="translator-box">
+            <div class="input-section">
+                <label for="english">English Text:</label>
+                <textarea 
+                    id="english" 
+                    placeholder="Enter any English word, sentence, or paragraph..."
+                    onkeyup="updateCharCount()"
+                ></textarea>
+                <div class="char-count"><span id="charCount">0</span>/1000</div>
+            </div>
+
+            <div class="right-column">
+                <div class="output-section">
+                    <label for="output">Kannada Text:</label>
+                    <div id="output" role="status" aria-live="polite">---</div>
+                </div>
+                <div class="history" id="history">No history yet.</div>
+            </div>
+        </div>
+
+        <div class="button-section">
+            <button onclick="translateText()" id="translateBtn">Translate</button>
+        </div>
+
+        <div class="status" id="status"></div>
+        <div class="history" id="history">No history yet.</div>
+    </div>
+
+    <script>
+        // Fallback dictionary for offline use
+        const fallbackDictionary = {
+            'hello': 'ನಮಸ್ಕಾರ',
+            'good morning': 'ಶುಭೋದಯ',
+            'good night': 'ಶುಭರಾತ್ರಿ',
+            'thank you': 'ಧನ್ಯವಾದ',
+            'please': 'ದಯವಿಟ್ಟು',
+            'yes': 'ಹೌದು',
+            'no': 'ಇಲ್ಲ',
+            'water': 'ನೀರು',
+            'food': 'ಆಹಾರ',
+            'friend': 'ಸ್ನೇಹಿತ',
+            'family': 'ಕುಟುಂಬ',
+            'love': 'ಪ್ರೀತಿ',
+            'happy': 'ಸುಖ',
+            'sad': 'ದುಃಖ',
+            'help': 'ಸಹಾಯ',
+            'good': 'ಒಳ್ಳೆಯ',
+            'bad': 'ಕೆಟ್ಟ',
+            'person': 'ವ್ಯಕ್ತಿ',
+            'name': 'ಹೆಸರು',
+            'house': 'ಮನೆ',
+            'how': 'ಎಲ್ಲಿ',
+            'are': 'ಇರುವುದು',
+            'you': 'ನೀವು',
+        };
+
+        // Globals
+        let srcLang = 'en';
+        let tgtLang = 'kn';
+        let history = [];
+
+        function updateCharCount() {
+            const count = document.getElementById('english').value.length;
+            document.getElementById('charCount').textContent = count;
+        }
+
+        // Debounce utility
+        function debounce(fn, wait) {
+            let t = null;
+            return function(...args) {
+                clearTimeout(t);
+                t = setTimeout(()=>fn.apply(this, args), wait);
+            };
+        }
+
+        function onSampleChange() {
+            const s = document.getElementById('samples');
+            document.getElementById('english').value = s.value;
+            updateCharCount();
+        }
+
+        // Auto-translate while typing (debounced)
+        const debouncedTranslate = debounce(()=>{
+            // do not auto-translate empty
+            const v = document.getElementById('english').value.trim();
+            if (v) translateText();
+        }, 550);
+
+        document.getElementById('english').addEventListener('input', debouncedTranslate);
+
+        function clearAll() {
+            document.getElementById('english').value = '';
+            document.getElementById('output').textContent = '---';
+            document.getElementById('status').textContent = '';
+            updateCharCount();
+        }
+
+        function copyOutput() {
+            const out = document.getElementById('output').textContent;
+            if (!out || out === '---') return;
+            const s = document.getElementById('status');
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(out).then(()=>{
+                    s.textContent = 'Copied to clipboard';
+                    s.style.color = '#28a745';
+                    setTimeout(()=>s.textContent='',1500);
+                }).catch(()=>{
+                    s.textContent = 'Copy failed';
+                    s.style.color = '#dc3545';
+                    setTimeout(()=>s.textContent='',1500);
+                });
+            } else {
+                // Fallback: select and copy
+                try {
+                    const ta = document.createElement('textarea');
+                    ta.value = out;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                    s.textContent = 'Copied to clipboard';
+                    s.style.color = '#28a745';
+                    setTimeout(()=>s.textContent='',1500);
+                } catch (e) {
+                    s.textContent = 'Copy not supported';
+                    s.style.color = '#dc3545';
+                    setTimeout(()=>s.textContent='',1500);
+                }
+            }
+        }
+
+        function speakOutput() {
+            const out = document.getElementById('output').textContent;
+            if (!out || out === '---') return;
+            if ('speechSynthesis' in window) {
+                const utter = new SpeechSynthesisUtterance(out);
+                // Prefer a Kannada voice if available
+                const voices = speechSynthesis.getVoices();
+                let chosen = null;
+                for (const v of voices) {
+                    if (v.lang && v.lang.toLowerCase().startsWith('kn')) { chosen = v; break; }
+                }
+                if (!chosen) {
+                    // try regional variants or Hindi as fallback
+                    for (const v of voices) {
+                        if (v.lang && (v.lang.toLowerCase().startsWith('hi') || v.lang.toLowerCase().startsWith('en'))) { chosen = v; break; }
+                    }
+                }
+                if (chosen) utter.voice = chosen;
+                speechSynthesis.speak(utter);
+            } else {
+                alert('Speech synthesis not supported in this browser.');
+            }
+        }
+
+        async function translateText() {
+            const englishText = document.getElementById('english').value.trim();
+            const outputDiv = document.getElementById('output');
+            const statusDiv = document.getElementById('status');
+            const translateBtn = document.getElementById('translateBtn');
+
+            if (!englishText) {
+                outputDiv.textContent = '---';
+                statusDiv.textContent = '';
+                return;
+            }
+
+            if (englishText.length > 1000) {
+                statusDiv.textContent = 'Input too long (max 1000 chars)';
+                statusDiv.style.color = '#dc3545';
+                return;
+            }
+
+            // Show loading state
+            translateBtn.disabled = true;
+            statusDiv.innerHTML = '<div class="spinner"></div> Translating...';
+            statusDiv.style.color = '#667eea';
+
+            try {
+                // Try online translation first
+                const translation = await translateOnline(englishText);
+                outputDiv.textContent = translation;
+                statusDiv.innerHTML = '<span class="success">✓ Translation complete</span>';
+                addHistory(englishText, translation);
+            } catch (error) {
+                console.log('Online translation failed, using fallback', error);
+                const translation = translateWithFallback(englishText);
+                outputDiv.textContent = translation;
+                statusDiv.innerHTML = '<span class="error">⚠ Using offline dictionary</span>';
+                addHistory(englishText, translation);
+            }
+
+            translateBtn.disabled = false;
+        }
+
+        async function translateOnline(text) {
+            try {
+                const params = new URLSearchParams({
+                    'client': 'gtx',
+                    'sl': srcLang,
+                    'tl': tgtLang,
+                    'dt': 't',
+                    'q': text
+                });
+
+                const response = await fetch(
+                    'https://translate.googleapis.com/translate_a/single?' + params,
+                    {
+                        headers: {
+                            'User-Agent': 'Mozilla/5.0'
+                        }
+                    }
+                );
+
+                if (!response.ok) throw new Error('Translation failed');
+
+                const data = await response.json();
+                return data[0][0][0] || text;
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        function translateWithFallback(englishText) {
+            // Support fallback in both directions: EN->KN and KN->EN
+            const text = englishText.trim();
+            if (!text) return '';
+
+            if (srcLang === 'en' && tgtLang === 'kn') {
+                const lower = text.toLowerCase();
+                if (fallbackDictionary[lower]) return fallbackDictionary[lower];
+                const words = lower.split(/\s+/);
+                return words.map(w => fallbackDictionary[w] || w).join(' ');
+            } else if (srcLang === 'kn' && tgtLang === 'en') {
+                // reverse lookup: find English keys by Kannada value
+                const rev = {};
+                for (const k in fallbackDictionary) rev[fallbackDictionary[k]] = k;
+                if (rev[text]) return rev[text];
+                // otherwise return original
+                return text;
+            }
+            return text;
+        }
+
+        // Allow Ctrl+Enter for translation
+        document.getElementById('english').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+                translateText();
+            }
+        });
+
+        // --- Speech recognition (browser) ---
+        let recognition = null;
+        let recognizing = false;
+        let recognitionBase = '';
+
+        function supportsSpeechRecognition() {
+            return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+        }
+
+        function initRecognition() {
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRec) return null;
+            const r = new SpeechRec();
+            r.lang = 'en-US';
+            r.interimResults = true;
+            r.maxAlternatives = 1;
+
+            r.onstart = () => {
+                recognizing = true;
+                recognitionBase = document.getElementById('english').value || '';
+                document.getElementById('recordBtn').textContent = '⏹ Stop';
+                document.getElementById('status').innerHTML = '<div class="spinner"></div> Listening...';
+                document.getElementById('status').style.color = '#667eea';
+            };
+
+            r.onend = () => {
+                recognizing = false;
+                document.getElementById('recordBtn').textContent = '🎤 Record';
+            };
+
+            r.onerror = (e) => {
+                console.log('Recognition error', e);
+                const st = document.getElementById('status');
+                st.textContent = 'Voice recognition error';
+                st.style.color = '#dc3545';
+            };
+
+            r.onresult = (event) => {
+                let interim = '';
+                let final = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    const res = event.results[i];
+                    if (res.isFinal) final += res[0].transcript;
+                    else interim += res[0].transcript;
+                }
+                // set textarea to base + final + interim (avoid duplications)
+                const el = document.getElementById('english');
+                const combined = (recognitionBase ? recognitionBase + ' ' : '') + (final + interim).trim();
+                el.value = combined.trim();
+                updateCharCount();
+                // If final part exists, trigger translate
+                if (final.trim()) {
+                    setTimeout(()=>{ translateText(); }, 250);
+                }
+            };
+
+            return r;
+        }
+
+        function toggleRecognition() {
+            if (!supportsSpeechRecognition()) {
+                alert('Speech recognition is not supported in this browser. Use Chrome or Edge.');
+                return;
+            }
+
+            if (!recognition) recognition = initRecognition();
+            if (!recognition) {
+                alert('Unable to initialize speech recognition.');
+                return;
+            }
+
+            if (recognizing) {
+                recognition.stop();
+            } else {
+                try {
+                    recognition.start();
+                } catch (e) {
+                    console.log('start error', e);
+                }
+            }
+        }
+
+        // Toggle translation direction EN<->KN
+        function toggleDirection() {
+            const btn = document.getElementById('dirBtn');
+            if (srcLang === 'en') {
+                srcLang = 'kn'; tgtLang = 'en';
+                btn.textContent = 'KN → EN';
+                document.querySelector('label[for="english"]').textContent = 'Kannada Text:';
+                document.querySelector('label[for="output"]').textContent = 'English Text:';
+                document.getElementById('english').placeholder = 'Enter Kannada text...';
+            } else {
+                srcLang = 'en'; tgtLang = 'kn';
+                btn.textContent = 'EN → KN';
+                document.querySelector('label[for="english"]').textContent = 'English Text:';
+                document.querySelector('label[for="output"]').textContent = 'Kannada Text:';
+                document.getElementById('english').placeholder = 'Enter English text...';
+            }
+            document.getElementById('output').textContent = '---';
+            document.getElementById('status').textContent = '';
+        }
+
+        // History handling
+        function addHistory(src, tgt) {
+            history.unshift({src, tgt});
+            if (history.length > 30) history.pop();
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const h = document.getElementById('history');
+            if (!history.length) { h.textContent = 'No history yet.'; return; }
+            h.innerHTML = '';
+            history.forEach((it, idx) => {
+                const el = document.createElement('div');
+                el.className = 'history-item fade-in';
+                el.innerHTML = `<strong>${escapeHtml(it.src)}</strong><div style="color:#666;font-size:13px;margin-top:4px">${escapeHtml(it.tgt)}</div>`;
+                el.onclick = () => {
+                    document.getElementById('english').value = it.src;
+                    updateCharCount();
+                    translateText();
+                };
+                h.appendChild(el);
+            });
+        }
+
+        function escapeHtml(s) {
+            return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+    </script>
+</body>
+</html>
