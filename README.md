@@ -48,4 +48,4 @@ Notes:
 - The HTML UI uses an unofficial Google endpoint; if rate-limited or offline it will use the built-in fallback dictionary.
 - `t.py` uses only Python standard library modules.
 
-If you want a requirements file or to add a dependency (e.g., `googletrans`), tell me and I'll add it.
+
