@@ -206,7 +206,8 @@ import os
 
 def main():
     port = int(os.environ.get('PORT', 5000))
-    host = '127.0.0.1'  # Use localhost for local development
+    # Use 0.0.0.0 for deployment, 127.0.0.1 for local
+    host = '0.0.0.0' if os.environ.get('PORT') else '127.0.0.1'
     server = HTTPServer((host, port), TranslatorHandler)
     print(f'English → Kannada Translator running at: http://localhost:{port}')
     print('Press Ctrl+C to stop')
