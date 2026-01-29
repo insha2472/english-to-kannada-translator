@@ -13,7 +13,7 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f4976c 0%, #ffa552 30%, #ff7b54 60%, #d84315 100%);
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 30%, #3b82f6 60%, #8b5cf6 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -42,7 +42,7 @@
         }
         
         .subtitle {
-            color: #c65911;
+            color: #0369a1;
             font-size: 14px;
             font-weight: 500;
         }
@@ -82,22 +82,22 @@
         
         input:focus, textarea:focus {
             outline: none;
-            border-color: #ff8a50;
-            box-shadow: 0 0 0 3px rgba(255, 138, 80, 0.12);
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12);
         }
         
         #output {
             width: 100%;
             padding: 14px;
-            border: 1px solid #ffe0cc;
+            border: 1px solid #cffafe;
             border-radius: 8px;
-            background: #fffbf7;
+            background: #f0f9ff;
             min-height: 140px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 18px;
-            color: #c65911;
+            color: #0369a1;
             font-weight: 600;
             word-wrap: break-word;
             white-space: pre-wrap;
@@ -109,7 +109,7 @@
         }
         
         button {
-            background: linear-gradient(135deg, #ff8a50 0%, #ff6b35 100%);
+            background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
             color: white;
             border: none;
             padding: 10px 16px;
@@ -118,13 +118,13 @@
             cursor: pointer;
             font-weight: 600;
             transition: all 0.18s ease;
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.28);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.28);
         }
 
         .control-btn {
             background: transparent;
             color: #333;
-            border: 1px solid #ffe0cc;
+            border: 1px solid #cffafe;
             padding: 8px 10px;
             border-radius: 8px;
             box-shadow: none;
@@ -133,8 +133,8 @@
 
         .control-btn:hover {
             transform: translateY(-2px);
-            border-color: #ff8a50;
-            background: #fff5f0;
+            border-color: #0ea5e9;
+            background: #f0f9ff;
         }
 
         .primary-btn {
@@ -145,7 +145,7 @@
         
         select {
             padding: 8px 12px;
-            border: 1px solid #ffe0cc;
+            border: 1px solid #cffafe;
             border-radius: 8px;
             font-size: 14px;
             background: white;
@@ -156,13 +156,13 @@
 
         select:focus {
             outline: none;
-            border-color: #ff8a50;
-            box-shadow: 0 0 0 3px rgba(255, 138, 80, 0.12);
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12);
         }
 
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
         }
         
         button:active {
@@ -187,7 +187,7 @@
             width: 16px;
             height: 16px;
             border: 3px solid #f3f3f3;
-            border-top: 3px solid #ff8a50;
+            border-top: 3px solid #0ea5e9;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -198,25 +198,25 @@
         }
         
         .success {
-            color: #d97706;
+            color: #0369a1;
         }
 
         .error {
-            color: #ea580c;
+            color: #0284c7;
         
         .char-count {
             text-align: right;
             font-size: 12px;
-            color: #d97706;
+            color: #0284c7;
             margin-top: 5px;
         }
         
         .history {
             margin-top: 14px;
-            background: #fff9f3;
+            background: #f0f9ff;
             border-radius: 8px;
             padding: 8px;
-            border: 1px solid #ffe0cc;
+            border: 1px solid #cffafe;
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
             max-height: 260px;
             overflow: auto;
@@ -224,13 +224,13 @@
 
         .history-item {
             padding: 8px 10px;
-            border-bottom: 1px solid #f0e6dd;
+            border-bottom: 1px solid #e0f2fe;
             cursor: pointer;
             border-radius: 4px;
             transition: background 0.12s ease;
         }
 
-        .history-item:hover { background: #fff0e6; }
+        .history-item:hover { background: #e0f2fe; }
 
         .history-item:last-child { border-bottom: none; }
 
@@ -326,6 +326,14 @@
         let tgtLang = 'kn';
         let history = [];
 
+        // Preload voices on page load
+        if ('speechSynthesis' in window) {
+            speechSynthesis.getVoices();
+            speechSynthesis.onvoiceschanged = () => {
+                console.log('Voices loaded:', speechSynthesis.getVoices().length);
+            };
+        }
+
         function updateCharCount() {
             const count = document.getElementById('english').value.length;
             document.getElementById('charCount').textContent = count;
@@ -398,26 +406,121 @@
 
         function speakOutput() {
             const out = document.getElementById('output').textContent;
-            if (!out || out === '---') return;
-            if ('speechSynthesis' in window) {
-                const utter = new SpeechSynthesisUtterance(out);
-                // Prefer a Kannada voice if available
-                const voices = speechSynthesis.getVoices();
-                let chosen = null;
-                for (const v of voices) {
-                    if (v.lang && v.lang.toLowerCase().startsWith('kn')) { chosen = v; break; }
-                }
-                if (!chosen) {
-                    // try regional variants or Hindi as fallback
-                    for (const v of voices) {
-                        if (v.lang && (v.lang.toLowerCase().startsWith('hi') || v.lang.toLowerCase().startsWith('en'))) { chosen = v; break; }
-                    }
-                }
-                if (chosen) utter.voice = chosen;
-                speechSynthesis.speak(utter);
-            } else {
-                alert('Speech synthesis not supported in this browser.');
+            const status = document.getElementById('status');
+            
+            if (!out || out === '---') {
+                status.textContent = '❌ No text to speak';
+                status.style.color = '#dc3545';
+                setTimeout(() => status.textContent = '', 2000);
+                return;
             }
+            if (!('speechSynthesis' in window)) {
+                status.textContent = '❌ Speech not supported (use Chrome/Edge/Safari)';
+                status.style.color = '#dc3545';
+                return;
+            }
+
+            // Cancel any ongoing speech
+            speechSynthesis.cancel();
+
+            const utter = new SpeechSynthesisUtterance(out);
+            utter.rate = 0.9;
+            utter.pitch = 1;
+            utter.volume = 1;
+            
+            status.textContent = '⏳ Preparing...';
+            status.style.color = '#0369a1';
+
+            // Get voices - if empty, wait for voiceschanged
+            let voices = speechSynthesis.getVoices();
+            console.log('Available voices:', voices.length);
+            
+            const attemptSpeak = () => {
+                voices = speechSynthesis.getVoices();
+                console.log('Attempting speak with', voices.length, 'voices');
+                
+                const voice = selectBestVoice(voices);
+                if (voice) {
+                    utter.voice = voice;
+                    console.log('Selected voice:', voice.name, voice.lang);
+                } else {
+                    console.log('No voice found, using default');
+                }
+                
+                // Set event handlers before speak
+                utter.onstart = () => {
+                    status.textContent = '🔊 Speaking...';
+                    status.style.color = '#0369a1';
+                    console.log('Speech started');
+                };
+
+                utter.onend = () => {
+                    status.textContent = '✓ Done';
+                    status.style.color = '#059669';
+                    console.log('Speech ended');
+                    setTimeout(() => status.textContent = '', 2000);
+                };
+
+                utter.onerror = (e) => {
+                    status.textContent = '❌ Error: ' + e.error;
+                    status.style.color = '#dc3545';
+                    console.error('Speech error:', e.error, e);
+                };
+                
+                // Actually speak
+                speechSynthesis.speak(utter);
+            };
+
+            if (voices.length === 0) {
+                console.log('Voices not loaded, waiting...');
+                const handler = () => {
+                    speechSynthesis.removeEventListener('voiceschanged', handler);
+                    attemptSpeak();
+                };
+                speechSynthesis.addEventListener('voiceschanged', handler);
+                // Also try after a delay as fallback
+                setTimeout(attemptSpeak, 1000);
+            } else {
+                attemptSpeak();
+            }
+        }
+
+        function selectBestVoice(voices) {
+            // Log all available voices for debugging
+            console.log('=== Available Voices ===');
+            voices.forEach((v, i) => console.log(`${i}: ${v.name} (${v.lang})`));
+            
+            // Try to find Kannada voice first
+            for (const v of voices) {
+                if (v.lang && v.lang.toLowerCase().includes('kn')) {
+                    console.log('✓ Found Kannada voice:', v.name);
+                    return v;
+                }
+            }
+            // Try Hindi as fallback (Hindi can pronounce Kannada better than English)
+            for (const v of voices) {
+                if (v.lang && v.lang.toLowerCase().includes('hi')) {
+                    console.log('✓ Found Hindi voice (fallback):', v.name);
+                    return v;
+                }
+            }
+            // Try Indian English
+            for (const v of voices) {
+                if (v.lang && v.lang.toLowerCase().includes('en-in')) {
+                    console.log('✓ Found Indian English voice:', v.name);
+                    return v;
+                }
+            }
+            // Fall back to any English voice
+            for (const v of voices) {
+                if (v.lang && v.lang.toLowerCase().startsWith('en')) {
+                    console.log('✓ Using English voice (fallback):', v.name);
+                    return v;
+                }
+            }
+            // Return first available voice as last resort
+            console.log('⚠ Using first available voice:', voices[0]?.name);
+            return voices.length > 0 ? voices[0] : null;
         }
 
         async function translateText() {
