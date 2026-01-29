@@ -16,6 +16,7 @@ import json
 import time
 import re
 import sys
+import os
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import parse_qs, urlparse
 
@@ -201,9 +202,12 @@ class TranslatorHandler(BaseHTTPRequestHandler):
         # Suppress default HTTP server logs
         pass
 
+import os
+
 def main():
-    port = 5000
-    server = HTTPServer(('0.0.0.0', port), TranslatorHandler)
+    port = int(os.environ.get('PORT', 5000))
+    host = '127.0.0.1'  # Use localhost for local development
+    server = HTTPServer((host, port), TranslatorHandler)
     print(f'English → Kannada Translator running at: http://localhost:{port}')
     print('Press Ctrl+C to stop')
     try:
