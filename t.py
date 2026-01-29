@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Robust English → Kannada translator (no external packages required).
+Robust English → Kannada translator Flask web app (no external packages required).
 
 Features:
 - Uses Google's unofficial translate endpoint via urllib (no API key).
 - Retries network requests and handles timeouts.
 - Falls back to an improved offline dictionary preserving punctuation.
-- Simple terminal UI.
+- Flask web UI.
 
 Usage: python t.py
 """
@@ -16,6 +16,8 @@ import json
 import time
 import re
 import sys
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from urllib.parse import parse_qs, urlparse
 
 
 def translate_online(text, retries=2, timeout=6):
@@ -132,25 +134,97 @@ def translate(text):
         return translate_with_fallback(text)
 
 
+class TranslatorHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == '/':
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            # Read and serve the HTML file content
+            try:
+                with open('t.html', 'r', encoding='utf-8') as f:
+                    html_content = f.read()
+                self.wfile.write(html_content.encode('utf-8'))
+            except FileNotFoundError:
+                # Fallback HTML if t.html not found
+                html = '''
+<!DOCTYPE html>
+<html>
+<head><title>English → Kannada Translator</title></head>
+<body>
+<h1>English → Kannada Translator</h1>
+<p>Error: t.html file not found. Please ensure t.html is in the same directory.</p>
+</body>
+</html>'''
+                self.wfile.write(html.encode())
+        elif self.path == '/translate':
+            # Handle AJAX translation requests
+            self.send_response(405)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(b'{"error": "Use POST method"}')
+    
+    def do_POST(self):
+        if self.path == '/translate':
+            # Handle AJAX translation requests from the HTML
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length).decode('utf-8')
+            
+            try:
+                import json
+                data = json.loads(post_data)
+                text = data.get('text', '')
+                kannada = translate(text) if text else ''
+                
+                response = {'translation': kannada}
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(response).encode())
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': str(e)}).encode())
+        else:
+            # Handle form submissions (fallback)
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length).decode('utf-8')
+            params = parse_qs(post_data)
+            text = params.get('text', [''])[0]
+            
+            kannada = translate(text) if text else ''
+            
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            html = f'''
+<!DOCTYPE html>
+<html>
+<head><title>English → Kannada Translator</title></head>
+<body>
+<h1>English → Kannada Translator</h1>
+<form method="post">
+<textarea name="text" rows="4" cols="50">{text}</textarea><br><br>
+<button type="submit">Translate</button>
+</form>
+<h2>Translation:</h2>
+<p style="font-size:18px;">{kannada}</p>
+</body>
+</html>'''
+            self.wfile.write(html.encode())
+
 def main():
-    print('=' * 60)
-    print('English → Kannada Translator')
-    print('=' * 60)
-    print("Type 'exit' to quit. Paste sentences (max ~500 chars).")
-
+    port = 5000
+    server = HTTPServer(('0.0.0.0', port), TranslatorHandler)
+    print(f'English → Kannada Translator running at: http://localhost:{port}')
+    print('Press Ctrl+C to stop')
     try:
-        while True:
-            english = input('\nEnglish: ').strip()
-            if not english:
-                continue
-            if english.lower() in ('exit', 'quit'):
-                print('Goodbye!')
-                break
-
-            kannada = translate(english)
-            print('\nKannada:', kannada)
-    except (KeyboardInterrupt, EOFError):
-        print('\nGoodbye!')
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print('\nServer stopped')
+        server.server_close()
 
 
 if __name__ == '__main__':
