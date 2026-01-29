@@ -155,7 +155,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-# The bottom of the file previously contained a second, duplicated implementation
-# using `requests`. That code has been removed to avoid duplicate definitions and
-# to ensure the script provides a single interactive translator (online first,
-# then fallback dictionary).
