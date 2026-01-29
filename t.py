@@ -140,10 +140,19 @@ class TranslatorHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
-            # Read and serve the HTML file content
+            # Read and serve the HTML file content from templates folder
             try:
-                with open('t.html', 'r', encoding='utf-8') as f:
+                with open('templates/t.html', 'r', encoding='utf-8') as f:
                     html_content = f.read()
+                    # Replace the translateOnline function to use Python backend
+                    html_content = html_content.replace(
+                        "const response = await fetch(\n                    'https://translate.googleapis.com/translate_a/single?' + params,\n                    {\n                        headers: {\n                            'User-Agent': 'Mozilla/5.0'\n                        }\n                    }\n                );",
+                        "const response = await fetch('/translate', {\n                    method: 'POST',\n                    headers: {\n                        'Content-Type': 'application/json'\n                    },\n                    body: JSON.stringify({ text: text })\n                });"
+                    )
+                    html_content = html_content.replace(
+                        "const data = await response.json();\n                return data[0][0][0] || text;",
+                        "const data = await response.json();\n                return data.translation || text;"
+                    )
                 self.wfile.write(html_content.encode('utf-8'))
             except FileNotFoundError:
                 # Fallback HTML if t.html not found
@@ -153,7 +162,7 @@ class TranslatorHandler(BaseHTTPRequestHandler):
 <head><title>English → Kannada Translator</title></head>
 <body>
 <h1>English → Kannada Translator</h1>
-<p>Error: t.html file not found. Please ensure t.html is in the same directory.</p>
+<p>Error: templates/t.html file not found.</p>
 </body>
 </html>'''
                 self.wfile.write(html.encode())
@@ -187,33 +196,10 @@ class TranslatorHandler(BaseHTTPRequestHandler):
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
                 self.wfile.write(json.dumps({'error': str(e)}).encode())
-        else:
-            # Handle form submissions (fallback)
-            content_length = int(self.headers.get('Content-Length', 0))
-            post_data = self.rfile.read(content_length).decode('utf-8')
-            params = parse_qs(post_data)
-            text = params.get('text', [''])[0]
-            
-            kannada = translate(text) if text else ''
-            
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-            html = f'''
-<!DOCTYPE html>
-<html>
-<head><title>English → Kannada Translator</title></head>
-<body>
-<h1>English → Kannada Translator</h1>
-<form method="post">
-<textarea name="text" rows="4" cols="50">{text}</textarea><br><br>
-<button type="submit">Translate</button>
-</form>
-<h2>Translation:</h2>
-<p style="font-size:18px;">{kannada}</p>
-</body>
-</html>'''
-            self.wfile.write(html.encode())
+    
+    def log_message(self, format, *args):
+        # Suppress default HTTP server logs
+        pass
 
 def main():
     port = 5000
